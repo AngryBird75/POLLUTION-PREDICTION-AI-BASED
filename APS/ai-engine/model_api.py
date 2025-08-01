@@ -1,23 +1,21 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import joblib
 import numpy as np
-from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)  # Allow cross-origin requests (important for Node.js integration)
+CORS(app)
 
-# Load trained model
 model = joblib.load('pollution_model.pkl')
 
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
         data = request.json
-        temperature = float(data.get('temperature'))
-        humidity = float(data.get('humidity'))
-        wind_speed = float(data.get('wind_speed'))
+        temperature = float(data.get('temperature', 25))
+        humidity = float(data.get('humidity', 50))
+        wind_speed = float(data.get('wind_speed', 1))
 
-        # Format for model input
         features = np.array([[temperature, humidity, wind_speed]])
         prediction = model.predict(features)
 

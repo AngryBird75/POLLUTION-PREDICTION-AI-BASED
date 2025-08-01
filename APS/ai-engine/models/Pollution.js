@@ -1,12 +1,16 @@
 const mongoose = require('mongoose');
 
 const pollutionSchema = new mongoose.Schema({
+  country: String,
+  city: String,
   temperature: Number,
   humidity: Number,
   wind_speed: Number,
-  pollution: Number,
-  date: String,
-  country: String
+  aqi: Number,
+  date: {
+    type: Date,
+    default: Date.now
+  }
 });
 
 module.exports = mongoose.model('Pollution', pollutionSchema);

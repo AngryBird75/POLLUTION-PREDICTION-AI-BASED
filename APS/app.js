@@ -19,7 +19,8 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 mongoose.connect('mongodb://localhost:27017/pollutiondb', {
-  useNewUrlParser: true, useUnifiedTopology: true,
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
 });
 
 const Pollution = mongoose.model('Pollution', {
@@ -31,7 +32,7 @@ const Pollution = mongoose.model('Pollution', {
   date: Date,
 });
 
-app.get('/a', async (req, res) => {
+app.get('/pollution', async (req, res) => {
   const data = await Pollution.find().sort({ date: -1 }).limit(30);
   res.render('pollution', { data });
 });
@@ -47,10 +48,61 @@ app.post('/predict', async (req, res) => {
     const response = await axios.post('http://127.0.0.1:5000/predict', req.body);
     res.send(response.data);
   } catch (err) {
-    console.error(err);
+    console.error(err.response?.data || err.message);
     res.status(500).send('AI Prediction Failed');
   }
 });
+
+app.get('/predict/history', async (req, res) => {
+  const { city, date } = req.query;
+
+  if (!city || !date) {
+    return res.status(400).send({ error: "City and date are required" });
+  }
+
+  try {
+    const record = await Pollution.findOne({
+      city: city,
+      date: {
+        $gte: new Date(date),
+        $lt: new Date(new Date(date).getTime() + 86400000)
+      }
+    });
+
+    if (!record) {
+      return res.status(404).send({ error: "No data found for given city/date" });
+    }
+
+    res.send({
+      city: record.city,
+      date: record.date,
+      aqi: record.aqi,
+      temperature: record.temperature,
+      humidity: record.humidity,
+      wind_speed: record.wind_speed
+    });
+  } catch (err) {
+    res.status(500).send({ error: "Server error" });
+  }
+});
+app.get('/records', async (req, res) => {
+  const { country, city, from, to } = req.query;
+  const query = {};
+
+  if (country) query.country = country;
+  if (city) query.city = city;
+  if (from && to) {
+    query.date = {
+      $gte: from,
+      $lte: to
+    };
+  }
+
+  const data = await Record.find(query).sort({ date: 1 });
+  res.render('pollution', { data });
+});
+
+
 // Routes
 app.get('/', (req, res) => {
     res.render('index');

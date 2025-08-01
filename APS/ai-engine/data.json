@@ -1,0 +1,29 @@
+[
+  {
+    "city": "Lahore",
+    "country": "PK",
+    "temperature": 34,
+    "humidity": 45,
+    "wind_speed": 5.2,
+    "aqi": 180,
+    "date": "2024-07-01T00:00:00Z"
+  },
+  {
+    "city": "Karachi",
+    "country": "PK",
+    "temperature": 32,
+    "humidity": 55,
+    "wind_speed": 6.1,
+    "aqi": 160,
+    "date": "2024-07-02T00:00:00Z"
+  },
+  {
+    "city": "Delhi",
+    "country": "IN",
+    "temperature": 36,
+    "humidity": 50,
+    "wind_speed": 4.9,
+    "aqi": 240,
+    "date": "2024-07-01T00:00:00Z"
+  }
+]
