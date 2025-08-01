@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Air Pollution Tracker</title>
+  <link rel="icon" type="image/png" href="/img/icon.png" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;600&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+      box-sizing: border-box;
+      font-family: 'Rubik', sans-serif;
+    }
+
+    body {
+      background: #f0f2f5;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-bottom: 80px;
+    }
+
+    h1 {
+      margin: 20px 0;
+      color: #2c3e50;
+    }
+
+    form {
+      background: #fff;
+      padding: 20px;
+      margin-bottom: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      width: 90%;
+      max-width: 500px;
+    }
+
+    form label {
+      display: block;
+      margin: 10px 0;
+      font-weight: 500;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      margin-top: 4px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      background-color: #2c3e50;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background-color: #34495e;
+    }
+
+    h2 {
+      margin: 20px 0 10px;
+      font-size: 22px;
+    }
+
+    table {
+      width: 95%;
+      max-width: 800px;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      padding: 12px 15px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #2c3e50;
+      color: white;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+
+    nav {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background-color: #2c3e50;
+      box-shadow: 0 -1px 5px rgba(0,0,0,0.1);
+    }
+
+    nav ul {
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+      margin: 0;
+      list-style: none;
+    }
+
+    nav ul li a {
+      color: white;
+      font-size: 20px;
+      text-decoration: none;
+    }
+
+    nav ul li a.active,
+    nav ul li a:hover {
+      color: #1abc9c;
+    }
+  </style>
+</head>
+<body>
+
+  <h1><i class="fa-solid fa-smog"></i> Air Pollution Tracker</h1>
+
+  <form action="/predict" method="POST">
+    <label>Temperature:
+      <input name="temperature" type="number" placeholder="°C" required />
+    </label>
+    <label>Humidity:
+      <input name="humidity" type="number" placeholder="%" required />
+    </label>
+    <label>Wind Speed:
+      <input name="wind_speed" type="number" placeholder="m/s" required />
+    </label>
+    <button type="submit"><i class="fa-solid fa-wind"></i> Predict AQI</button>
+  </form>
+  !-- 🟡 Show predicted AQI here -->
+<div id="result" style="margin-top: 20px; font-size: 20px; color: #2c3e50;"></div>
+  
+
+  <h2><i class="fa-solid fa-clock-rotate-left"></i> Recent Records</h2>
+  <table>
+    <tr>
+      <th>City</th>
+      <th>Temp (°C)</th>
+      <th>Humidity (%)</th>
+      <th>Wind (m/s)</th>
+      <th>AQI</th>
+      <th>Date</th>
+    </tr>
+    <% data.forEach(d => { %>
+      <tr>
+        <td><%= d.city %></td>
+        <td><%= d.temperature %></td>
+        <td><%= d.humidity %></td>
+        <td><%= d.wind_speed %></td>
+        <td><%= d.aqi %></td>
+        <td><%= d.date.toDateString() %></td>
+      </tr>
+    <% }) %>
+  </table>
+
+  <nav>
+    <ul>
+      <li><a href="/"><i class="fa-solid fa-house"></i></a></li>
+      <li><a class="active" href="/pollution"><i class="fa-solid fa-smog"></i></a></li>
+      <li><a href="/search"><i class="fa-solid fa-magnifying-glass-location"></i></a></li>
+    </ul>
+  </nav>
+
+<script>
+  document.getElementById("predictForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const temperature = parseFloat(this.temperature.value);
+    const humidity = parseFloat(this.humidity.value);
+    const wind_speed = parseFloat(this.wind_speed.value);
+
+    try {
+      const response = await fetch("http://127.0.0.1:5000/a", { // Flask route changed to /a
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ temperature, humidity, wind_speed })
+      });
+
+      const result = await response.json();
+
+      if (result.predicted_aqi) {
+        document.getElementById("result").innerHTML =
+          `<strong>Predicted AQI:</strong> ${result.predicted_aqi}`;
+
+        // Save in DB
+        await fetch('/add', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            city: 'Gujranwala',
+            temperature,
+            humidity,
+            wind_speed,
+            aqi: result.predicted_aqi,
+            date: new Date()
+          })
+        });
+
+        setTimeout(() => location.reload(), 1000);
+      } else {
+        document.getElementById("result").innerText = "Failed to predict AQI.";
+      }
+    } catch (err) {
+      console.error("Prediction Error:", err);
+      document.getElementById("result").innerText = "Error: " + err.message;
+    }
+  });
+</script>
+
+</body>
+</html>

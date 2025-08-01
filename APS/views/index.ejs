@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- links -->
+    <link rel="icon" type="png" href="/img/icon.png" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="/css/style.css" />
+    <!-- Title -->
+    <title>Weather App</title>
+  </head>
+
+  <body>
+    <!-- main section -->
+    <div id="screen">
+      <!-- city name -->
+      <div class="city-name">
+          <i class="fa-solid fa-map-pin"></i>
+          <h1 id="city-name">Gujranwala</h1>
+        </div>
+        <!-- weather icon -->
+        <div class="weather-icon-css">
+          <img class="weather-icon" src="/img/sun.png" />
+        </div>
+        <!-- weather details -->
+        <div class="weather-description">
+          <div class="show-metric" id="metric">0°</div>
+          <div class="weather-details">
+            <div class="weather-main" id="weather-main">Sunny</div>
+            <div class="h-f">
+              <div class="show-humidity">H: <span id="humidity">60</span></div>
+              ||
+              <div class="show-humidity">
+                F: <span id="feels-like">60</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Today-forecast -->
+        <div class="forcasts-box">
+          <div class="today-forecast">
+            <h4>TODAY</h4>
+            <div class="weather-icon-today">
+              <img class="weather-icons" src="/img/sun.png" />
+            </div>
+            <div class="temp-today">
+              <span id="temp-min-today">50°</span><span>/ </span
+              ><span id="temp-max-today">55°</span>
+            </div>
+            <div class="weather-main-today" id="weather-main">Sunny</div>
+          </div>
+
+          <!-- 5day Forecast -->
+          <div class="future-forecast">
+            <h5>6-DAYS FORECAST</h5>
+            <div id="future-forecast-box"></div>
+          </div>
+        </div>
+        <!-- nav section -->
+        <nav>
+          <ul>
+            <li>
+              <a class="active" href="/"
+                ><i class="fa-solid fa-location-arrow"></i
+              ></a>
+            </li>
+            <li>
+              <a href="/search"
+                ><i class="fa-solid fa-magnifying-glass"></i
+              ></a>
+            </li>
+            <li>
+              <a href="/world"><i class="fa-solid fa-earth-americas"></i></a>
+              <li>
+              <a href="/a"><i class="fa-solid fa-smog""></i></a>
+            </li>
+            </li>
+          </ul>
+        </nav>
+      </div>
+      <!-- script -->
+    <script src="/js/main.js"></script>
+  <script>
+    
+      document.addEventListener('DOMContentLoaded', () => {
+        fetchWeatherForCity('Gujranwala');
+      });
+
+      async function fetchWeatherForCity(city) {
+        try {
+          const weatherResponse = await fetch(`/weather?city=${encodeURIComponent(city)}&isForecast=true`);
+          if (!weatherResponse.ok) {
+              // This handles cases where the server returns a 404 or 500
+              throw new Error('Weather data could not be fetched for the specified city.');
+          }
+          const weatherData = await weatherResponse.json();
+
+          // === THE FIX IS HERE ===
+          // Verify that the coordinate data exists before proceeding
+          if (weatherData && weatherData.city && weatherData.city.coord) {
+            const { lat, lon } = weatherData.city.coord;
+            
+            // Now it's safe to call the other functions
+            fetchAirPollution(lat, lon);
+            updateWeatherDOM(weatherData);
+            displayForecast(weatherData);
+          } else {
+            // This handles cases where the API returns a 200 OK but the data is empty/invalid
+            throw new Error('API response did not contain valid city data.');
+          }
+
+        } catch (error) {
+          console.error("Error in fetchWeatherForCity:", error);
+          // Update the UI to show the error
+          document.getElementById('city-name').innerText = 'City Not Found';
+          document.getElementById('metric').innerText = 'N/A';
+        }
+      }
+
+      async function fetchAirPollution(lat, lon) {
+        try {
+          const response = await fetch(`/air-pollution?lat=${lat}&lon=${lon}`);
+          if (!response.ok) throw new Error('Air pollution data fetch failed');
+          const data = await response.json();
+
+          const aqiData = data.list[0];
+          const aqi = aqiData.main.aqi;
+          const components = aqiData.components;
+          const { description, className } = getAqiInfo(aqi);
+
+          const aqiValueEl = document.getElementById('air-quality-value');
+          const aqiDescEl = document.getElementById('air-quality-desc');
+          
+          aqiValueEl.textContent = aqi;
+          aqiDescEl.textContent = description;
+          aqiValueEl.className = 'aqi-value'; 
+          aqiValueEl.classList.add(className);
+
+          document.getElementById('co-value').textContent = components.co.toFixed(1);
+          document.getElementById('no2-value').textContent = components.no2.toFixed(1);
+          document.getElementById('o3-value').textContent = components.o3.toFixed(1);
+          document.getElementById('so2-value').textContent = components.so2.toFixed(1);
+        } catch (error) {
+          console.error("Failed to fetch air pollution data:", error);
+        }
+      }
+      
+      function updateWeatherDOM(data) {
+        const today = data.list[0];
+        document.getElementById("city-name").innerHTML = data.city.name;
+        document.getElementById("metric").innerHTML = Math.floor(today.main.temp) + "°";
+        document.querySelectorAll("#weather-main").forEach(el => el.innerHTML = today.weather[0].description);
+        document.getElementById("humidity").innerHTML = Math.floor(today.main.humidity);
+        document.getElementById("feels-like").innerHTML = Math.floor(today.main.feels_like);
+        document.getElementById("temp-min-today").innerHTML = Math.floor(today.main.temp_min) + "°";
+        document.getElementById("temp-max-today").innerHTML = Math.floor(today.main.temp_max) + "°";
+
+        const weatherCondition = today.weather[0].main.toLowerCase();
+        const iconPath = getIconPath(weatherCondition);
+        document.querySelector(".weather-icon").src = iconPath;
+        document.querySelector(".weather-icons").src = iconPath;
+      }
+
+      function displayForecast(data) {
+        const dailyForecasts = {};
+        data.list.forEach(item => {
+          const date = item.dt_txt.split(' ')[0];
+          if (!dailyForecasts[date]) dailyForecasts[date] = item;
+        });
+
+        const forecastDates = Object.keys(dailyForecasts).slice(1, 7);
+        let forecastbox = "";
+
+        forecastDates.forEach(date => {
+            let item = dailyForecasts[date];
+            let dayName = new Date(item.dt_txt).toLocaleDateString('en-US', { weekday: 'short' });
+            let imgSrc = getIconPath(item.weather[0].main.toLowerCase());
+            let temp = Math.floor(item.main.temp) + "°";
+            let desc = item.weather[0].description;
+            forecastbox += `
+            <div class="weather-forecast-box">
+              <div class="day-weather"><span>${dayName}</span></div>
+              <div class="weather-icon-forecast"><img src="${imgSrc}" /></div>
+              <div class="temp-weather"><span>${temp}</span></div>
+              <div class="weather-main-forecast">${desc}</div>
+            </div>`;
+        });
+        document.getElementById('future-forecast-box').innerHTML = forecastbox;
+      }
+
+      function getAqiInfo(aqi) {
+        switch (aqi) {
+          case 1: return { description: 'Good', className: 'aqi-1' };
+          case 2: return { description: 'Fair', className: 'aqi-2' };
+          case 3: return { description: 'Moderate', className: 'aqi-3' };
+          case 4: return { description: 'Poor', className: 'aqi-4' };
+          case 5: return { description: 'Very Poor', className: 'aqi-5' };
+          default: return { description: 'Unknown', className: '' };
+        }
+      }
+
+      function getIconPath(condition) {
+        const base = "/img/";
+        switch (condition) {
+            case "rain": return `${base}rain.png`;
+            case "clear": case "clear sky": return `${base}sun.png`;
+            case "snow": return `${base}snow.png`;
+            case "clouds": case "smoke": return `${base}cloud.png`;
+            case "mist": case "fog": return `${base}mist.png`;
+            case "haze": return `${base}haze.png`;
+            case "thunderstorm": return `${base}thunderstorm.png`;
+            default: return `${base}sun.png`;
+        }
+      }
+    </script>
+  </body>
+</html>
