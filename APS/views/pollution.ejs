@@ -21,7 +21,7 @@
       margin: auto;
       box-shadow: 0 0 15px rgba(0,0,0,0.1);
     }
-    input[type="number"] {
+    input{
       width: 100%; padding: 10px; margin-top: 10px;
       border-radius: 6px; border: 1px solid #ccc;
     }
@@ -51,6 +51,8 @@
   <h1><i class="fa-solid fa-smog"></i> AI Pollution Predictor</h1>
 
   <form id="predictForm">
+    <input name="country" type="text" placeholder="Country Name" required />
+    <input name="city" type="text" placeholder="City Name" required />
     <input name="temperature" type="number" placeholder="Temperature (°C)" required />
     <input name="humidity" type="number" placeholder="Humidity (%)" required />
     <input name="wind_speed" type="number" placeholder="Wind Speed (m/s)" required />
@@ -62,18 +64,21 @@
   <h2><i class="fa-solid fa-clock-rotate-left"></i> Recent Predictions</h2>
   <table>
     <tr>
-      <th>City</th><th>Temp</th><th>Humidity</th><th>Wind</th><th>AQI</th><th>Date</th>
+      <th>Date</th><th>Country</th><th>City</th><th>Temp</th><th>Humidity</th><th>Wind_speed</th><th>AQI</th>
     </tr>
-    <% data.forEach(d => { %>
-      <tr>
-        <td><%= d.city %></td>
-        <td><%= d.temperature %>°C</td>
-        <td><%= d.humidity %>%</td>
-        <td><%= d.wind_speed %> m/s</td>
-        <td><%= d.aqi %></td>
-        <td><%= new Date(d.date).toDateString() %></td>
-      </tr>
-    <% }) %>
+  <% records.forEach(record => { %>
+    <tr>
+      <td><%= record.date %></td>
+      <td><%= record.country %></td>
+      <td><%= record.city %></td>
+      <td><%= record.temperature %></td>
+      <td><%= record.humidity %></td>
+      <td><%= record.wind_speed %></td>
+      <td><%= record.predicted_pollution %></td>
+    </tr>
+  <% }) %>
+
+
   </table>
 
   <nav>
@@ -84,7 +89,9 @@
   <script>
     document.getElementById("predictForm").addEventListener("submit", async function (e) {
       e.preventDefault();
-
+     
+      const country = this.city.value;
+      const city = this.city.value;
       const temperature = parseFloat(this.temperature.value);
       const humidity = parseFloat(this.humidity.value);
       const wind_speed = parseFloat(this.wind_speed.value);
@@ -102,17 +109,19 @@
           document.getElementById("result").innerHTML = `<strong>Predicted AQI:</strong> ${result.predicted_aqi}`;
 
           await fetch('/add', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              city: 'Gujranwala',
-              temperature,
-              humidity,
-              wind_speed,
-              aqi: result.predicted_aqi,
-              date: new Date()
-            })
-          });
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    country,
+    city,
+    temperature,
+    humidity,
+    wind_speed,
+    predicted_pollution: result.predicted_aqi,
+    date: new Date().toISOString()
+  })
+});
+
 
           setTimeout(() => location.reload(), 1000);
         } else {

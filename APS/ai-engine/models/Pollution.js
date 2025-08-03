@@ -13,4 +13,4 @@ const pollutionSchema = new mongoose.Schema({
   }
 });
 
-module.exports = mongoose.model('Pollution', pollutionSchema);
+module.exports = mongoose.model('records', pollutionSchema);

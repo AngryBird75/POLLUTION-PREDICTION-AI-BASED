@@ -229,3 +229,92 @@ nav ul li a {
     border: 1px solid var(--font-color-main);
   }
 }
+/* Reset & Body */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+/* body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+  background: #f5f9ff;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+} */
+
+/* User Header */
+.user-header {
+  background: #0099cc;
+  color: white;
+  padding: 16px;
+  text-align: center;
+}
+.user-header h2 {
+  margin-bottom: 8px;
+}
+.user-header a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: bold;
+  margin: 0 8px;
+}
+.user-header a:hover {
+  text-decoration: underline;
+}
+
+/* Screen / Weather Container */
+
+
+/* ========== Fully Fluid Font Sizing & Spacing ========== */
+
+/* Auto-adjust heading size */
+.city-name h1 {
+  font-size: clamp(1.2rem, 5vw, 2.5rem);
+  text-align: center;
+  word-wrap: break-word;
+}
+
+/* Metric font scales smoothly */
+.show-metric {
+  font-size: clamp(2rem, 10vw, 5rem);
+  padding-left: clamp(10px, 5vw, 30px);
+}
+
+/* Weather Details font scaling */
+.weather-details {
+  font-size: clamp(12px, 2vw, 16px);
+  margin: clamp(20px, 5vw, 50px) clamp(10px, 4vw, 20px);
+  width: clamp(80px, 25vw, 120px);
+}
+
+/* Today Forecast Box */
+.today-forecast {
+  width: clamp(90px, 25vw, 150px);
+  height: clamp(160px, 40vw, 200px);
+}
+
+/* Future Forecast Box */
+.weather-forecast-box {
+  width: clamp(60px, 20vw, 100px);
+  height: clamp(100px, 30vw, 130px);
+  font-size: clamp(10px, 2vw, 14px);
+}
+
+/* Responsive Nav Items */
+nav ul li a {
+  font-size: clamp(14px, 3vw, 18px);
+  padding: clamp(6px, 2vw, 10px) clamp(10px, 4vw, 15px);
+}
+
+/* Future Forecast Container */
+.future-forecast {
+  width: clamp(250px, 80vw, 700px);
+  padding: clamp(10px, 3vw, 20px);
+}
+
+/* Weather Icon Size */
+.weather-icon-css img {
+  width: clamp(150px, 50vw, 400px);
+}

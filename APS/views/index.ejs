@@ -15,6 +15,16 @@
   </head>
 
   <body>
+    
+ <div class="user-header">
+      <% if (user) { %>
+        <h2>Welcome, <%= user.username || user.email %>!</h2>
+        <a href="/logout">Logout</a>
+      <% } else { %>
+        <a href="/login">Login</a> | <a href="/signup">Signup</a>
+      <% } %>
+    </div>
+
     <!-- main section -->
     <div id="screen">
       <!-- city name -->

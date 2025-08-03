@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Signup</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      height: 100vh;
+      background: linear-gradient(to right, #667eea, #764ba2);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    form {
+      background: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      width: 100%;
+      max-width: 400px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+      color: #555;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 20px;
+      padding: 12px;
+      background-color: #667eea;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background-color: #5a67d8;
+    }
+
+    p {
+      text-align: center;
+      margin-top: 15px;
+      color: #333;
+    }
+
+    a {
+      color: #667eea;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    img {
+      display: block;
+      margin: 10px auto 0;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <form action="/signup" method="POST">
+    <h1>Signup</h1>
+
+    <% if (message) { %>
+      <p style="color: red;"><%= message %></p>
+    <% } %>
+
+    <div>
+      <label for="username">Username</label>
+      <input type="text" name="username" id="username" required />
+    </div>
+
+    <div>
+      <label for="email">Email</label>
+      <input type="email" name="email" id="email" required />
+    </div>
+
+    <div>
+      <label for="password">Password</label>
+      <input type="password" name="password" id="password" required />
+    </div>
+
+    <button type="submit">Sign Up</button>
+
+    <p>Already have an account? <a href="/login">Login here</a></p>
+
+    <p>OR</p>
+    <a href="/auth/google">
+      <img src="https://developers.google.com/identity/images/btn_google_signin_dark_normal_web.png"
+           alt="Sign in with Google" />
+    </a>
+  </form>
+</body>
+</html>
